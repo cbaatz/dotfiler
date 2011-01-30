@@ -6,12 +6,10 @@
 Dotfiler manages dotfile symlinks to a separate folder to make backup
 and version control easier.
 
-** TODO Write test-cases (and test data)
 ** TODO Write basic CLI interface
 ** TODO Write installation docs
 ** TODO Git and github
 ** TODO Install from github, use and make notes on help 
-
 ** Understanding Dotfiler
 *** Management convention
 
