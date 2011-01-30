@@ -6,10 +6,10 @@
 Dotfiler manages dotfile symlinks to a separate folder to make backup
 and version control easier.
 
-** TODO Structure package and upload to github
-SCHEDULED: <2011-01-30 Sun>
-** TODO Install from github, use and make notes on help
-SCHEDULED: <2011-01-30 Sun>
+** TODO Clean up packaging
+SCHEDULED: <2011-02-05 Sat>
+** TODO Create README file
+SCHEDULED: <2011-02-05 Sat>
 ** TODO Make it possible to create relative symlinks
 ** TODO Command to restore dotfiles from backup (put managed file list in .dotfiles)
 ** Understanding Dotfiler

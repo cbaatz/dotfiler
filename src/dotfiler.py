@@ -250,8 +250,8 @@ def do_unmanage(*files):
         except NotManagedException as e:
             print(" ERROR. %s" % e.message)
 
-def main(*args):
-    args = list(args)
+def main():
+    args = list(sys.argv)
     program = args.pop(0)
     command = None
     if args:
@@ -278,4 +278,4 @@ unmanage DOTFILES      Remove DOTFILES from management
 """)
 
 if __name__ == "__main__":
-    main(*sys.argv)
+    main()
