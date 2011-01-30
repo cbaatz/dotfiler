@@ -183,16 +183,16 @@ def unmanage(dotfile_path):
     dot_dir = os.path.dirname(config_file.name)
     files = []
 
-    if is_partially_managed(dotfile_path):
-        files = list(generate_filenames(dotfile_path))
-    elif not is_managed(dotfile_path):
-        raise NotManagedException("%s is not a managed dotfile." % dotfile_path)
-    else:
+    if is_managed(dotfile_path):
         files = [dotfile_path]
+    elif is_partially_managed(dotfile_path):
+        files = list(generate_filenames(dotfile_path))
+    else:
+        raise NotManagedException("%s is not a managed dotfile." % dotfile_path)
 
     for f in files:
         if is_managed(f):
-            target_file = os.path.join(os.path.dirname(f), os.readlink(f))
+            target_file = os.readlink(f)
             os.remove(f)
             shutil.move(target_file, f)
 

@@ -102,7 +102,7 @@ class UnmanageTests(TempDirTestCase):
         self.dot_dir = os.path.join(dotfiler.HOME_DIR, "dotdir")
         dotfiler.init(self.dot_dir)
 
-    def test_managed(self):
+    def test_managed_file(self):
         self.setUp()
         # Create managed file
         filename = os.path.join(self.home_dir, ".testfile1")
@@ -117,6 +117,22 @@ class UnmanageTests(TempDirTestCase):
         self.assertFalse(os.path.islink(filename))
         self.assertFalse(os.path.islink(filename))
         self.assertFalse(os.path.exists(os.path.join(self.dot_dir, "testfile1")))
+
+    def test_managed_dir(self):
+        self.setUp()
+        # Create managed file
+        dirname = os.path.join(self.home_dir, ".testdir")
+        os.mkdir(dirname)
+        open(os.path.join(dirname, "testfile"), "w").close()
+        # Manage file and check results
+        dotfiler.manage(dirname)
+        self.assertTrue(dotfiler.is_managed(dirname))
+        self.assertTrue(os.path.exists(os.path.join(self.dot_dir, "testdir")))
+        # Unmanage file and check results
+        dotfiler.unmanage(dirname)
+        self.assertFalse(dotfiler.is_managed(dirname))
+        self.assertFalse(os.path.islink(dirname))
+        self.assertFalse(os.path.exists(os.path.join(self.dot_dir, "testdir")))
 
     def test_managed_nested(self):
         self.setUp()
