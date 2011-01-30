@@ -6,10 +6,12 @@
 Dotfiler manages dotfile symlinks to a separate folder to make backup
 and version control easier.
 
-** TODO Write basic CLI interface
-** TODO Write installation docs
-** TODO Git and github
-** TODO Install from github, use and make notes on help 
+** TODO Structure package and upload to github
+SCHEDULED: <2011-01-30 Sun>
+** TODO Install from github, use and make notes on help
+SCHEDULED: <2011-01-30 Sun>
+** TODO Make it possible to create relative symlinks
+** TODO Command to restore dotfiles from backup (put managed file list in .dotfiles)
 ** Understanding Dotfiler
 *** Management convention
 
@@ -89,13 +91,3 @@ Example usage:
 
 cd ~
 dotfiler unmanage .emacs .ssh/config
-
-**** dotfiler stop-management
-
-Stop Dotfielr dot-file management as follows:
-
-1. Unmanages all dot-files
-2. Removes the ~/.dotfiles symlink
-
-This will not remove the Dotfiler dir however, you'll need to do that
-manually.
