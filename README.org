@@ -16,13 +16,15 @@ convention:
 3. Mangaged dot-files can be normal files, directories or files inside
    dot-directories. For files inside dot-directoreis, only the root
    directory's leading dot is removed.
-4. Dotfiler requires that a special symlink file, ~/.dotfiles, points
-   to the Dotfiler config in the designated dot-files directory.
+4. Dotfiler requires that a special symlink file, =~/.dotfiles=,
+   points to the Dotfiler config in the designated dot-files
+   directory.
 
-For example, if your dot-files directory is ~/dotdir and we want to
-manage .emacs, and ~/.ssh/config (but nothing else inside ~/.ssh), we
-would have the following files (-> indicates symlink):
+For example, if your dot-files directory is =~/dotdir= and we want to
+manage =.emacs=, and =~/.ssh/config= (but nothing else inside
+=~/.ssh=), we would have the following files (-> indicates symlink):
 
+#+BEGIN_EXAMPLE
 # Normal files
 ~/dotdir/dotfiles    # Dotfiler config target
 ~/dotdir/emacs       # Target of ~/.emacs
@@ -36,6 +38,7 @@ would have the following files (-> indicates symlink):
 # Examples of unmanaged files
 ~/.ssh/known_hosts
 ~/.vimrc
+#+END_EXAMPLE
 
 ** Installation
 
@@ -44,7 +47,7 @@ would have the following files (-> indicates symlink):
 : cd /opt/manual # Or wherever you prefer
 : sudo git clone git://github.com/cbaatz/dotfiler.git
 
-2. Add the -bin- directory to your -PATH-
+2. Add the =dotfiler/bin= directory to your =PATH=
 
 : echo 'PATH=/opt/manual/dotfiler/bin:$PATH' >> ~/.profile
 or
@@ -64,14 +67,15 @@ which is the dot-files direcotry?
 
 Initialises Dotfiler management as follows:
 
-1. Creates the DOTFILER_DIR if it doesn't exist
-2. Creates an initial Dotfiler config file DOTFILER_DIR/dotfiles
-3. Creates the required symlink ~/.dotfiles -> DOTFILER_DIR/dotfiles
+1. Creates the =DOTFILER_DIR= if it doesn't exist.
+2. Creates an initial Dotfiler config file =DOTFILER_DIR/dotfiles=.
+3. Creates the required symlink =~/.dotfiles ->
+   DOTFILER_DIR/dotfiles=.
 
 : dotfiler manage DOT_FILES
 : cd ~; dotfiler manage .emacs .vimrc .ssh/config # Example
 
-Puts DOT_FILES under management as follows:
+Puts =DOT_FILES= under management as follows:
 
 1. For each file, checks that it is not yet managed or partially
    managed; skips the file if it is.
@@ -83,9 +87,9 @@ Puts DOT_FILES under management as follows:
 : dotfiler unmanage DOT_FILES
 : cd ~; dotfiler unmanage .emacs .ssh/config
 
-Removes DOT_FILES from management as follows:
+Removes =DOT_FILES= from management as follows:
 
-1. Removes DOT_FILES Dotfiler symlinks (recursively for dot-directories)
-2. Moves the Dotfiler dir files corresponding to DOT_FILES back to the
-   home directory adding the leading dot
+1. Removes each symlink (recursively for dot-directories).
+2. Moves each file from the dot-files directory back to the home
+   directory, adding the leading dot.
 
