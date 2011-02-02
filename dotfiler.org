@@ -6,8 +6,13 @@
 Dotfiler manages dotfile symlinks to a separate folder to make backup
 and version control easier.
 
-** TODO Clean up packaging
-SCHEDULED: <2011-02-05 Sat>
+** DONE Clean up packaging
+
+Just provide a relative symlink to dotfiler.py in a bin dir. Install
+by cloning repo and adding the bin dir to PATH. Avoids Python specific
+packaging.
+
+SCHEDULED: <2011-02-05 Sat> CLOSED: [2011-02-02 Wed 09:04]
 ** TODO Create README file
 SCHEDULED: <2011-02-05 Sat>
 ** TODO Make it possible to create relative symlinks
