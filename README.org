@@ -43,17 +43,14 @@ manage =.emacs=, and =~/.ssh/config= (but nothing else inside
 ** Installation
 
 1. Clone the repository
-
-: cd /opt/manual # Or wherever you prefer
-: sudo git clone git://github.com/cbaatz/dotfiler.git
-
+   : cd /opt/manual # Or wherever you prefer
+   : sudo git clone git://github.com/cbaatz/dotfiler.git
 2. Add the =dotfiler/bin= directory to your =PATH=
-
-: echo 'PATH=/opt/manual/dotfiler/bin:$PATH' >> ~/.profile
-or
-: echo 'PATH=/opt/manual/dotfiler/bin:$PATH' >> ~/.bashrc
-depending on which file you use/prefer. /Remember to change the path to
-your install path./
+   : echo 'PATH=/opt/manual/dotfiler/bin:$PATH' >> ~/.profile
+   or
+   : echo 'PATH=/opt/manual/dotfiler/bin:$PATH' >> ~/.bashrc
+   depending on which file you use/prefer. /Remember to change the
+   path to your install path./
 
 ** Usage
 
