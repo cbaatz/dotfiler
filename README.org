@@ -63,7 +63,7 @@ Gives basic information and help. Is Dotfiler initialised? If so,
 which is the dot-files direcotry?
 
 : dotfiler init DOTFILER_DIR
-: dotfiler init ~/mydotfiles # Example
+: # Example: dotfiler init ~/mydotfiles
 
 Initialises Dotfiler management as follows:
 
@@ -73,7 +73,7 @@ Initialises Dotfiler management as follows:
    DOTFILER_DIR/dotfiles=.
 
 : dotfiler manage DOT_FILES
-: cd ~; dotfiler manage .emacs .vimrc .ssh/config # Example
+: # Example: cd ~; dotfiler manage .emacs .vimrc .ssh/config
 
 Puts =DOT_FILES= under management as follows:
 
@@ -85,7 +85,7 @@ Puts =DOT_FILES= under management as follows:
    the dot-files direcotry.
 
 : dotfiler unmanage DOT_FILES
-: cd ~; dotfiler unmanage .emacs .ssh/config
+: # Example: cd ~; dotfiler unmanage .emacs .ssh/config
 
 Removes =DOT_FILES= from management as follows:
 
