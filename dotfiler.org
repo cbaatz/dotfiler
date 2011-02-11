@@ -15,6 +15,11 @@ packaging.
 SCHEDULED: <2011-02-05 Sat> CLOSED: [2011-02-02 Wed 09:04]
 ** DONE Create README file
 SCHEDULED: <2011-02-05 Sat> CLOSED: [2011-02-02 Wed 10:02]
-** TODO Note that for only version control, negated gitignore may be preferable
+** DONE Note that for only version control, negated gitignore may be preferable
+SCHEDULED: <2011-02-11 Fri> CLOSED: [2011-02-11 Fri 10:53]
+** TODO Rewrite code for the new convention
+SCHEDULED: <2011-02-12 Sat>
 ** TODO Make it possible to create relative symlinks
+SCHEDULED: <2011-02-12 Sat>
 ** TODO Command to restore dotfiles from backup (put managed file list in .dotfiles)
+SCHEDULED: <2011-02-18 Fri>
