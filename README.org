@@ -95,7 +95,7 @@ Options:
 If you'd like to avoid symlinks, you can make your home directory a
 git repo, exclude all files by default (=echo '*' >
 ~/.git/info/exclude=) and add exceptions for each file you want to
-manage (=echo '!.emacs' >> ~/.git/info/exclude=). See
+manage (=echo '!.emacs.d/' >> ~/.git/info/exclude=). See
 [[http://www.kernel.org/pub/software/scm/git/docs/gitignore.html]] for
 details.
 
