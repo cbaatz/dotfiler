@@ -35,12 +35,16 @@ class PartiallyManagedException(Exception):
     pass
 class NotManagedException(Exception):
     pass
+class TargetIsSymlinkException(Exception):
+    pass
+class DotfileExistsException(Exception):
+    pass
 
 def undot(string):
     return string.lstrip(".")
 
 def dot_to_target(path):
-    # todo exception if dir is not home
+    # TODO: exception if dir is not home
     filename = os.path.basename(path)
     if filename.startswith("."):
         nakedname = filename[1:]
@@ -48,8 +52,13 @@ def dot_to_target(path):
 #        raise NotManageableException("%s does not start with a dot.", filename)
     return os.path.join(dot_dir(), nakedname)
 
-def target_to_dot(name):
-    pass
+def target_to_dot(path):
+    filename = os.path.basename(path)
+    if not filename.startswith("."):
+        dotname = "." + filename
+    # else:
+    #     raise Exception
+    return os.path.join(HOME_DIR, dotname)
 
 def add(dot_path):
     """
@@ -86,12 +95,24 @@ def restore(dot_path):
         os.remove(dot_path)
         shutil.move(dot_to_target(dot_path), dot_path)
 
-def update(clean=True, overwrite=False):
+def update(target_path, overwrite=False):
     """
-    Update home-dir symlinks for managed dot-files.
+    Update target_path in home directory (creating symlink to it).
 
     """
-    pass
+   dot_path  = target_to_dot(target_path)
+   if os.path.islink(target_path):
+       raise TargetIsSymlinkException("%s is a symlink.", target_path)
+   elif exists(dot_path) and not islink(dot_path) \
+        and not (isfile(dot_path) and overwrite):
+       raise DotfileExistsException("%s exists.", dot_path)
+   else: # Overwrite symlink
+       try:
+           os.remove(dot_path)
+       except:
+           pass
+       os.symlink(target_path, dot_path)
+   return dot_path
 
 def do_status():
     print("Status command not yet implemented.")
@@ -103,13 +124,13 @@ def do_add(*files):
     else:
         for f in files:
             print("Adding %s to managed files..." % f, end="")
-        try:
-            add(f)
-            print(" DONE.")
-        except NotManageableException as e:
-            print(" ERROR. %s" % e.message)
-        except AlreadyManagedException as e:
-            print(" ERROR. %s" % e.message)
+            try:
+                add(f)
+                print(" DONE.")
+            except NotManageableException as e:
+                print(" ERROR. %s" % e.message)
+            except AlreadyManagedException as e:
+                print(" ERROR. %s" % e.message)
 
 def do_restore(*files):
     if len(files) < 1:
@@ -118,11 +139,27 @@ def do_restore(*files):
     else:
         for f in files:
             print("Removing %s from management..." % f, end="")
-        try:
-            restore(f)
-            print(" DONE.")
-        except NotManagedException as e:
-            print(" ERROR. %s" % e.message)
+            try:
+                restore(f)
+                print(" DONE.")
+            except NotManagedException as e:
+                print(" ERROR. %s" % e.message)
+
+def do_update():
+    files = map(os.path.abspath, os.listdir("."))
+    if len(files) < 1:
+        print("Nothing to do. DONE.")
+    else:
+        print("%d files to update" % len(files))
+        for f in files:
+            print("Updating %s..." % f)
+            try:
+                update(f)
+                print(" DONE.")
+            except DotfilesExistsException as e:
+                print(" SKIPPING: %s" % e.message)
+            except TargetIsSymlink as e:
+                print(" SKIPPING: %s" % e.message)
 
 def main():
     args = list(sys.argv)
@@ -144,9 +181,9 @@ def main():
     if command == None:
         print("""\nAvailable commands:
 
-add     DOTFILES      Put DOTFILES under management
-restore DOTFILES      Remove DOTFILES from management
-update                Update symlinks in home dir
+add     DOTFILES  Put DOTFILES under management
+restore DOTFILES  Remove DOTFILES from management
+update            Update symlinks in home dir from dot-files dir
 """)
 
 if __name__ == "__main__":

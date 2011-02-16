@@ -22,6 +22,7 @@ SCHEDULED: <2011-02-12 Sat> CLOSED: [2011-02-12 Sat 11:05]
 
 ** TODO Write update code for the new convention
 SCHEDULED: <2011-02-16 Wed>
-
+** TODO Write tests for update code
+SCHEDULED: <2011-02-19 Sat>
 ** TODO Write interface for the new convention
 SCHEDULED: <2011-02-19 Sat>
