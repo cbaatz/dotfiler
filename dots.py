@@ -8,6 +8,7 @@ dot-files directory. See README.org for usage.
 """
 from __future__ import print_function
 import os
+from os.path import exists, isfile, islink
 import shutil
 import sys
 
@@ -100,19 +101,19 @@ def update(target_path, overwrite=False):
     Update target_path in home directory (creating symlink to it).
 
     """
-   dot_path  = target_to_dot(target_path)
-   if os.path.islink(target_path):
-       raise TargetIsSymlinkException("%s is a symlink.", target_path)
-   elif exists(dot_path) and not islink(dot_path) \
-        and not (isfile(dot_path) and overwrite):
-       raise DotfileExistsException("%s exists.", dot_path)
-   else: # Overwrite symlink
-       try:
-           os.remove(dot_path)
-       except:
-           pass
-       os.symlink(target_path, dot_path)
-   return dot_path
+    dot_path = target_to_dot(target_path)
+    if os.path.islink(target_path):
+        raise TargetIsSymlinkException("%s is a symlink.", target_path)
+    elif exists(dot_path) and not islink(dot_path) \
+             and not (isfile(dot_path) and overwrite):
+        raise DotfileExistsException("%s exists.", dot_path)
+    else: # Overwrite symlink
+        try:
+            os.remove(dot_path)
+        except:
+            pass
+        os.symlink(target_path, dot_path)
+    return dot_path
 
 def do_status():
     print("Status command not yet implemented.")
@@ -146,6 +147,7 @@ def do_restore(*files):
                 print(" ERROR. %s" % e.message)
 
 def do_update():
+    # TODO: Add clean-up broken links function
     files = map(os.path.abspath, os.listdir("."))
     if len(files) < 1:
         print("Nothing to do. DONE.")

@@ -20,9 +20,11 @@ SCHEDULED: <2011-02-11 Fri> CLOSED: [2011-02-11 Fri 10:53]
 ** DONE Write add/restore code for the new convention
 SCHEDULED: <2011-02-12 Sat> CLOSED: [2011-02-12 Sat 11:05]
 
-** TODO Write update code for the new convention
-SCHEDULED: <2011-02-16 Wed>
-** TODO Write tests for update code
-SCHEDULED: <2011-02-19 Sat>
+** DONE Write update code for the new convention
+SCHEDULED: <2011-02-16 Wed> CLOSED: [2011-02-16 Wed 19:54]
+- State "DONE"       from "TODO"       [2011-02-16 Wed 19:54]
+** DONE Write tests for update code
+SCHEDULED: <2011-02-19 Sat> CLOSED: [2011-02-17 Thu 22:32]
+- State "DONE"       from "TODO"       [2011-02-17 Thu 22:32]
 ** TODO Write interface for the new convention
 SCHEDULED: <2011-02-19 Sat>

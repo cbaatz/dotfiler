@@ -114,7 +114,51 @@ class RestoreTests(TempDirTestCase):
         self.assertRaises(dots.NotManagedException, dots.restore, dotpath)
 
 class UpdateTests(TempDirTestCase):
-    pass
+    def test_target_to_dot(self):
+        targetpath = os.path.join(self.dot_dir, "testfile")
+        dotpath = os.path.join(self.home_dir, ".testfile")
+        self.assertEqual(dotpath, dots.target_to_dot(targetpath))
+
+    def test_symlink_target(self):
+        targetpath = os.path.join(self.dot_dir, "testfile")
+        os.symlink(os.path.join(self.dot_dir, "atarget"), targetpath)
+        self.assertRaises(dots.TargetIsSymlinkException, dots.update, targetpath)
+
+    def test_dotfile_nonexistent(self):
+        targetpath = os.path.join(self.dot_dir, "testfile")
+        open(targetpath, "w").close()
+        dotpath = dots.target_to_dot(targetpath)
+        dots.update(targetpath)
+        self.assertTrue(os.path.exists(dotpath))
+        self.assertTrue(os.path.islink(dotpath))
+        self.assertEqual(os.readlink(dotpath), targetpath)
+
+    def test_dotfile_islink(self):
+        targetpath = os.path.join(self.dot_dir, "testfile")
+        dotpath = dots.target_to_dot(targetpath)
+        open(targetpath, "w").close()
+        os.symlink(targetpath, dotpath)
+        dots.update(targetpath)
+        self.assertTrue(os.path.exists(dotpath))
+        self.assertTrue(os.path.islink(dotpath))
+        self.assertEqual(os.readlink(dotpath), targetpath)
+
+    def test_dotfile_exists_default(self):
+        targetpath = os.path.join(self.dot_dir, "testfile")
+        dotpath = dots.target_to_dot(targetpath)
+        open(targetpath, "w").close()
+        open(dotpath, "w").close()
+        self.assertRaises(dots.DotfileExistsException, dots.update, targetpath)
+
+    def test_dotfile_exists_overwrite(self):
+        targetpath = os.path.join(self.dot_dir, "testfile")
+        dotpath = dots.target_to_dot(targetpath)
+        open(targetpath, "w").close()
+        open(dotpath, "w").close()
+        dots.update(targetpath, overwrite=True)
+        self.assertTrue(os.path.exists(dotpath))
+        self.assertTrue(os.path.islink(dotpath))
+        self.assertEqual(os.readlink(dotpath), targetpath)
 
 if __name__ == "__main__":
     unittest.main()
