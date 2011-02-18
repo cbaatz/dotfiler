@@ -15,83 +15,85 @@ convention:
   represent, but otherwise have the same name.
 
 For example, if your dot-files directory is =~/dotdir= and we want to
-manage =.emacs=, and =~/.ssh=, we would have the following files (->
-indicates symlink):
+manage =.emacs.d=, and =~/.profile=, we would have the following files
+(-> indicates symlink):
 
 #+BEGIN_EXAMPLE
 # Normal files
-~/dotdir/emacs       # Target of ~/.emacs
-~/dotdir/shh         # Target of ~/.ssh
-~/dotdir/ssh/config  # Example file inside ssh dir
+~/dotdir/emacs.d
+~/dotdir/profile
 
 # Symlinked dot-files
-~/.emacs  -> ~/dotdir/emacs
-~/.ssh    -> ~/dotdir/ssh/config
+~/.emacs.d  -> ~/dotdir/emacs.d
+~/.profile  -> ~/dotdir/profile
 
-# Examples of unmanaged (normal) files
+# Unmanaged files remain untouched in ~, for example:
 ~/.vimrc
-~/.emacs.d
+~/.ssh
 #+END_EXAMPLE
 
 ** Installation
-Recommended way (using Git for your dot-files directory):
 
-: # Replace ~/dotfiles with whatever path your prefer
+Recommended way assumes Git versioning of the dot-files directory:
+
+: # Replace '~/dotfiles' with the your preferred dot-files directory
 : mkdir ~/dotfiles
 : cd ~/dotfiles
 : git init
 : git submodule add git://github.com/cbaatz/dotfiler.git
-: ln -s dotfiler/dots . # Optional but recommended
+: ln -s dotfiler/dotfiler . # Optional but recommended
 
-If you're not using Git for your dot-files directory, you can just
-clone the repo instead of adding it as a submodule:
+By default, Dotfiler uses the parent directory of its install
+directory as the dot-files directory. For example, if you installed
+Dotfiler in =~/mydotfiles/dotfiler=, the dot-files directory would be
+=~/mydotfiles=. You can set the dot-files directory explicitly with
+the =DOTFILES_DIR= environment variable.
 
-: # Replace ~/dotfiles with whatever path your prefer
-: mkdir ~/dotfiles
-: cd ~/dotfiles
+Alternatively, if you're not using Git for your dot-files directory,
+or you prefer to install Dotfiler somewhere else, you can clone the
+repo and set the =DOTFILES_DIR= environment variable:
+
+: # Replace '/opt/local/manual' with your preferred path
+: cd /opt/local/manual
 : git clone git://github.com/cbaatz/dotfiler.git
-: ln -s dotfiler/dots . # Optional but recommended
-
-Note that Dotfiler must be executed from the dot-files directory since
-there is no environment variable or setting that specifies where it
-is.
+: # Add the dotfiler script to your PATH and set the DOTFILES_DIR to
+: # your preferred dot-files directory:
+: echo "PATH=$PATH:/opt/local/manual/dotfiler" >> ~/.profile
+: echo "DOTFILES_DIR=~/mydotfiles"
 
 ** Usage
 
-: dots
+: dotfiler status
 
-Show dot-files management status.
+Show dot-files management status (dot-files directory and status for
+each file).
 
-: dots add DOT_FILES
-: # Example: cd ~/dotfiles; dots add ~/.emacs ~/.vimrc
+: dotfiler add DOT_FILES
+: # Example: dotfiler add ~/.emacs ~/.vimrc
 
 Manages dot-files by moving each file to your dot-files directory
 (removing the leading dot) and creating a symlink from your home-dir.
 
-: dots return DOT_FILES
-: # Example: cd ~/dotfiles; dots return ~/.emacs ~/.vimrc
-: #          cd ~/dotfiles; dots return ~/* # Unmanage all
+: dotfiler restore DOT_FILES
+: # Example: dotfiler restore ~/.emacs ~/.vimrc
+: #          dotfiler restore ~/* # Unmanage all
 
 Unmanages dot-files by moving each file back to your home-dir (removing
 the symlink). Ignores files that are not managed.
 
-: dots update [<options>]
-: # Example: cd ~/dotfiles
-: #          git checkout HEAD^
-: #          dots update
+: dotfiler update [<options>]
+: # Example: git checkout HEAD^
+: #          dotfiler update
 
 Updates symlinks in home-dir to point to the files in the dot-files
-directory. Use this
+directory.
 
 Options:
 
--k Keep symlinks in home-dir even if they have no counterpart in the
-   dot-files directory (i.e. they are broken).
+--overwrite Overwrite normal files in home-dir with symlinks to files
+            in dot-files directory. DANGEROUS.
 
--F Overwrite normal files in home-dir with symlinks to files in
-   dot-files directory. This can be dangerous.
-
-** Alternative approach
+** Alternative management approach
 If you'd like to avoid symlinks, you can make your home directory a
 git repo, exclude all files by default (=echo '*' >
 ~/.git/info/exclude=) and add exceptions for each file you want to

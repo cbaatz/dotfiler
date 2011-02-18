@@ -21,10 +21,18 @@ class flushfile(object):
         self.f.flush()
 sys.stdout = flushfile(sys.stdout)
 
+VERSION = '0.2.0-alpha'
 HOME_DIR = os.environ['HOME']
 
+def get_dot_dir():
+    if os.environ.get('DOTFILES_DIR', False):
+        return (os.path.abspath(os.environ['DOTFILES_DIR']), "DOTFILES_DIR")
+    else:
+        dotfiler_dir = os.path.dirname(os.path.abspath(__file__))
+        return (os.path.split(dotfiler_dir)[0], "Dotfiler parent dir")
+
 def dot_dir():
-    return os.path.abspath(os.environ['PWD'])
+    return get_dot_dir()[0]
 
 class DirExistsException(Exception):
     pass
@@ -40,9 +48,6 @@ class TargetIsSymlinkException(Exception):
     pass
 class DotfileExistsException(Exception):
     pass
-
-def undot(string):
-    return string.lstrip(".")
 
 def dot_to_target(path):
     # TODO: exception if dir is not home
@@ -115,6 +120,55 @@ def update_path(target_path, overwrite=False):
         os.symlink(target_path, dot_path)
     return dot_path
 
+def get_target_names():
+    targets = set([os.path.abspath(os.path.join(dot_dir(), f))
+                   for f in os.listdir(dot_dir()) if not f.startswith('.')])
+    targets.discard(dot_dir())
+    return targets
+
+def get_dot_names():
+    return set([os.path.abspath(os.path.join(HOME_DIR, f))
+                for f in os.listdir(HOME_DIR) if f.startswith('.')])
+
+def status(namespace):
+    print("\nDot-files directory: %s (%s)" % get_dot_dir())
+
+    targets = get_target_names()
+    dots = get_dot_names()
+
+    pairs = set()
+
+    unlinked, managed, unmanaged = [], [], []
+    for f in dots:
+        if os.path.islink(f):
+            link = os.path.join(os.path.dirname(f), os.readlink(f))
+            if link in targets:
+                targets.remove(link)
+                managed.append((f, link))
+            else:
+                unmanaged.append((f, link))
+        else:
+            unmanaged.append((f, None))
+    for f in targets:
+        unlinked.append((None, f))
+
+    def simplify(string):
+        if string.startswith(HOME_DIR):
+            return "~/" + string.lstrip(HOME_DIR)
+        else:
+            return string
+
+    print("\nManaged:\n")
+    for (dot, target) in sorted(managed):
+        print("%-25s ----->     %s" % (simplify(dot), simplify(target)))
+    print("\nUnmanaged:\n")
+    for (dot, target) in sorted(unmanaged):
+        target = target or ""
+        print("%-25s ----->     %s" % (simplify(dot), simplify(target)))
+    print("\nUnlinked:\n")
+    for (dot, target) in sorted(unlinked):
+        print("%-25s ----->     %s" % ("", simplify(target)))
+
 def add(namespace):
     files = namespace.files
     for f in map(os.path.abspath, files):
@@ -156,14 +210,16 @@ def update(namespace):
             except TargetIsSymlink as e:
                 print(" SKIPPING: %s" % e.message)
 
-    # TODO: Add clean-up broken links function
-
 import argparse
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION)
     subparsers = parser.add_subparsers(title="Available commands",
                                        help='sub-command help')
+
+    parser_s = subparsers.add_parser('status', help='Dot-files management status')
+    parser_s.set_defaults(func=status)
 
     parser_a = subparsers.add_parser('add', help='Add dot-file to management')
     parser_a.set_defaults(func=add)

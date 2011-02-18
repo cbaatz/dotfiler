@@ -2,8 +2,8 @@
 
 import unittest
 import random
-import dotfiler
-
+import imp
+dotfiler = imp.load_source('dotfiler', './dotfiler')
 import os
 import shutil
 import tempfile
@@ -19,7 +19,7 @@ class TempDirTestCase(unittest.TestCase):
         self.home_dir = tempfile.mkdtemp()
         self.dot_dir = os.path.join(self.home_dir, "dotfiles")
         os.mkdir(self.dot_dir)
-        os.environ['PWD'] = self.dot_dir
+        os.environ['DOTFILES_DIR'] = self.dot_dir
         dotfiler.HOME_DIR = self.home_dir
 
     def tearDown(self):
@@ -35,16 +35,25 @@ class GlobalTests(unittest.TestCase):
         """
         self.assertEqual(dotfiler.HOME_DIR, os.environ["HOME"])
 
-    def test_dot_dir_current(self):
+    def test_dot_dir_parent(self):
+        exec_dir = os.path.dirname(os.path.abspath(__file__))
+        dot_dir = os.path.split(exec_dir)[0]
+        os.environ['DOTFILES_DIR'] = ''
+        self.assertEqual(dot_dir, dotfiler.dot_dir())
+        self.assertEqual(dotfiler.dot_dir(), os.path.abspath(dotfiler.dot_dir()))
+
+    def test_dot_dir_env(self):
         self.dot_dir = os.path.join(tempfile.mkdtemp(), "dotfiles")
-        os.environ['PWD'] = self.dot_dir
+        os.environ['DOTFILES_DIR'] = self.dot_dir
         self.assertEqual(self.dot_dir, dotfiler.dot_dir())
         self.assertEqual(dotfiler.dot_dir(), os.path.abspath(dotfiler.dot_dir()))
 
-    def test_dot_to_target(self):
-        pass
-
 class AddTests(TempDirTestCase):
+    def test_dot_to_target(self):
+        targetpath = os.path.join(self.dot_dir, "testfile")
+        dotpath = os.path.join(self.home_dir, ".testfile")
+        self.assertEqual(dotfiler.dot_to_target(dotpath), targetpath)
+
     def test_normal_file(self):
         dotname = os.path.join(self.home_dir, ".testfile")
         open(dotname, "w").close()
