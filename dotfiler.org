@@ -26,5 +26,10 @@ SCHEDULED: <2011-02-16 Wed> CLOSED: [2011-02-16 Wed 19:54]
 ** DONE Write tests for update code
 SCHEDULED: <2011-02-19 Sat> CLOSED: [2011-02-17 Thu 22:32]
 - State "DONE"       from "TODO"       [2011-02-17 Thu 22:32]
-** TODO Write interface for the new convention
-SCHEDULED: <2011-02-19 Sat>
+** DONE Write interface for the new convention
+SCHEDULED: <2011-02-19 Sat> CLOSED: [2011-02-17 Thu 23:59]
+- State "DONE"       from "TODO"       [2011-02-17 Thu 23:59]
+
+** TODO Fix dot_dir logic (settings file?)
+** TODO Status message
+** TODO Test for target_to_dot()

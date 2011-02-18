@@ -2,7 +2,7 @@
 
 import unittest
 import random
-import dots
+import dotfiler
 
 import os
 import shutil
@@ -15,16 +15,16 @@ class TempDirTestCase(unittest.TestCase):
     """
     def setUp(self):
         super(TempDirTestCase, self).setUp()
-        self.orig_home_dir = dots.HOME_DIR
+        self.orig_home_dir = dotfiler.HOME_DIR
         self.home_dir = tempfile.mkdtemp()
         self.dot_dir = os.path.join(self.home_dir, "dotfiles")
         os.mkdir(self.dot_dir)
         os.environ['PWD'] = self.dot_dir
-        dots.HOME_DIR = self.home_dir
+        dotfiler.HOME_DIR = self.home_dir
 
     def tearDown(self):
         super(TempDirTestCase, self).tearDown()
-        dots.HOME_DIR = self.orig_home_dir
+        dotfiler.HOME_DIR = self.orig_home_dir
 
 class GlobalTests(unittest.TestCase):
 
@@ -33,12 +33,13 @@ class GlobalTests(unittest.TestCase):
         HOME_DIR is set to the environment variable HOME.
 
         """
-        self.assertEqual(dots.HOME_DIR, os.environ["HOME"])
+        self.assertEqual(dotfiler.HOME_DIR, os.environ["HOME"])
 
     def test_dot_dir_current(self):
         self.dot_dir = os.path.join(tempfile.mkdtemp(), "dotfiles")
         os.environ['PWD'] = self.dot_dir
-        self.assertEqual(self.dot_dir, dots.dot_dir())
+        self.assertEqual(self.dot_dir, dotfiler.dot_dir())
+        self.assertEqual(dotfiler.dot_dir(), os.path.abspath(dotfiler.dot_dir()))
 
     def test_dot_to_target(self):
         pass
@@ -47,11 +48,11 @@ class AddTests(TempDirTestCase):
     def test_normal_file(self):
         dotname = os.path.join(self.home_dir, ".testfile")
         open(dotname, "w").close()
-        targetname = os.path.join(dots.dot_dir(), "testfile")
+        targetname = os.path.join(dotfiler.dot_dir(), "testfile")
 
         self.assertFalse(os.path.islink(dotname))
         self.assertFalse(os.path.exists(targetname))
-        result = dots.add(dotname)
+        result = dotfiler.add_path(dotname)
         self.assertTrue(os.path.islink(dotname))
         self.assertTrue(os.path.isfile(targetname))
         self.assertEqual(result, os.path.abspath(targetname))
@@ -60,14 +61,15 @@ class AddTests(TempDirTestCase):
 
     def test_link_correct(self):
         dotpath = os.path.join(self.home_dir, ".testfile")
-        targetpath = dots.dot_to_target(dotpath)
+        targetpath = dotfiler.dot_to_target(dotpath)
         os.symlink(targetpath, dotpath)
 
         self.assertTrue(os.path.islink(dotpath))
         self.assertEqual(os.path.abspath(os.readlink(dotpath)),
                          os.path.abspath(targetpath))
 
-        self.assertRaises(dots.AlreadyManagedException, dots.add, dotpath)
+        self.assertRaises(dotfiler.AlreadyManagedException,
+                          dotfiler.add_path, dotpath)
 
         # Nothing should have changed
         self.assertTrue(os.path.islink(dotpath))
@@ -81,7 +83,9 @@ class AddTests(TempDirTestCase):
         self.assertTrue(os.path.islink(dotpath))
         self.assertEqual(os.path.abspath(os.readlink(dotpath)),
                          os.path.abspath("something"))
-        self.assertRaises(dots.NotManageableException, dots.add, dotpath)
+        self.assertRaises(dotfiler.NotManageableException,
+                          dotfiler.add_path, dotpath)
+
         # Nothing should have changed
         self.assertTrue(os.path.islink(dotpath))
         self.assertEqual(os.path.abspath(os.readlink(dotpath)),
@@ -91,11 +95,11 @@ class RestoreTests(TempDirTestCase):
     def test_managed_file(self):
         dotpath = os.path.join(self.home_dir, ".testfile")
         open(dotpath, "w").close()
-        targetpath = dots.add(dotpath)
+        targetpath = dotfiler.add_path(dotpath)
         self.assertTrue(os.path.exists(targetpath))
         self.assertFalse(os.path.islink(targetpath))
         self.assertTrue(os.path.islink(dotpath))
-        dots.restore(dotpath)
+        dotfiler.restore_path(dotpath)
         self.assertFalse(os.path.exists(targetpath))
         self.assertFalse(os.path.islink(dotpath))
         self.assertTrue(os.path.isfile(dotpath))
@@ -105,57 +109,61 @@ class RestoreTests(TempDirTestCase):
         open(dotpath, "w").close()
         self.assertTrue(os.path.exists(dotpath))
         self.assertFalse(os.path.islink(dotpath))
-        self.assertRaises(dots.NotManagedException, dots.restore, dotpath)
+        self.assertRaises(dotfiler.NotManagedException,
+                          dotfiler.restore_path, dotpath)
 
     def test_nonexistent_file(self):
         dotpath = os.path.join(self.home_dir, ".testfile")
         self.assertFalse(os.path.exists(dotpath))
         self.assertFalse(os.path.islink(dotpath))
-        self.assertRaises(dots.NotManagedException, dots.restore, dotpath)
+        self.assertRaises(dotfiler.NotManagedException,
+                          dotfiler.restore_path, dotpath)
 
 class UpdateTests(TempDirTestCase):
     def test_target_to_dot(self):
         targetpath = os.path.join(self.dot_dir, "testfile")
         dotpath = os.path.join(self.home_dir, ".testfile")
-        self.assertEqual(dotpath, dots.target_to_dot(targetpath))
+        self.assertEqual(dotpath, dotfiler.target_to_dot(targetpath))
 
     def test_symlink_target(self):
         targetpath = os.path.join(self.dot_dir, "testfile")
         os.symlink(os.path.join(self.dot_dir, "atarget"), targetpath)
-        self.assertRaises(dots.TargetIsSymlinkException, dots.update, targetpath)
+        self.assertRaises(dotfiler.TargetIsSymlinkException,
+                          dotfiler.update_path, targetpath)
 
     def test_dotfile_nonexistent(self):
         targetpath = os.path.join(self.dot_dir, "testfile")
         open(targetpath, "w").close()
-        dotpath = dots.target_to_dot(targetpath)
-        dots.update(targetpath)
+        dotpath = dotfiler.target_to_dot(targetpath)
+        dotfiler.update_path(targetpath)
         self.assertTrue(os.path.exists(dotpath))
         self.assertTrue(os.path.islink(dotpath))
         self.assertEqual(os.readlink(dotpath), targetpath)
 
     def test_dotfile_islink(self):
         targetpath = os.path.join(self.dot_dir, "testfile")
-        dotpath = dots.target_to_dot(targetpath)
+        dotpath = dotfiler.target_to_dot(targetpath)
         open(targetpath, "w").close()
         os.symlink(targetpath, dotpath)
-        dots.update(targetpath)
+        dotfiler.update_path(targetpath)
         self.assertTrue(os.path.exists(dotpath))
         self.assertTrue(os.path.islink(dotpath))
         self.assertEqual(os.readlink(dotpath), targetpath)
 
     def test_dotfile_exists_default(self):
         targetpath = os.path.join(self.dot_dir, "testfile")
-        dotpath = dots.target_to_dot(targetpath)
+        dotpath = dotfiler.target_to_dot(targetpath)
         open(targetpath, "w").close()
         open(dotpath, "w").close()
-        self.assertRaises(dots.DotfileExistsException, dots.update, targetpath)
+        self.assertRaises(dotfiler.DotfileExistsException,
+                          dotfiler.update_path, targetpath)
 
     def test_dotfile_exists_overwrite(self):
         targetpath = os.path.join(self.dot_dir, "testfile")
-        dotpath = dots.target_to_dot(targetpath)
+        dotpath = dotfiler.target_to_dot(targetpath)
         open(targetpath, "w").close()
         open(dotpath, "w").close()
-        dots.update(targetpath, overwrite=True)
+        dotfiler.update_path(targetpath, overwrite=True)
         self.assertTrue(os.path.exists(dotpath))
         self.assertTrue(os.path.islink(dotpath))
         self.assertEqual(os.readlink(dotpath), targetpath)
