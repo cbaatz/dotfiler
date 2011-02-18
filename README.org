@@ -90,8 +90,8 @@ directory.
 
 Options:
 
---overwrite Overwrite normal files in home-dir with symlinks to files
-            in dot-files directory. DANGEROUS.
+=--overwrite= Overwrite normal files in home-dir with symlinks to
+              files in dot-files directory. DANGEROUS.
 
 ** Alternative management approach
 If you'd like to avoid symlinks, you can make your home directory a
