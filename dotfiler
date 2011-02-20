@@ -24,16 +24,6 @@ sys.stdout = flushfile(sys.stdout)
 VERSION = '0.2.0-alpha'
 HOME_DIR = os.environ['HOME']
 
-def get_dot_dir():
-    if os.environ.get('DOTFILES_DIR', False):
-        return (os.path.abspath(os.environ['DOTFILES_DIR']), "DOTFILES_DIR")
-    else:
-        dotfiler_dir = os.path.dirname(os.path.abspath(__file__))
-        return (os.path.split(dotfiler_dir)[0], "Dotfiler parent dir")
-
-def dot_dir():
-    return get_dot_dir()[0]
-
 class DirExistsException(Exception):
     pass
 class NotManageableException(Exception):
@@ -48,6 +38,20 @@ class TargetIsSymlinkException(Exception):
     pass
 class DotfileExistsException(Exception):
     pass
+
+def get_dot_dir():
+    dotfiler_dir = os.path.dirname(os.path.abspath(__file__))
+    if os.environ.get('DOTFILES_DIR', False):
+        return (os.path.abspath(os.environ['DOTFILES_DIR']),
+                "DOTFILES_DIR",
+                dotfiler_dir)
+    else:
+        return (os.path.split(dotfiler_dir)[0],
+                "Dotfiler parent dir",
+                dotfiler_dir)
+
+def dot_dir():
+    return get_dot_dir()[0]
 
 def dot_to_target(path):
     # TODO: exception if dir is not home
@@ -120,21 +124,23 @@ def update_path(target_path, overwrite=False):
         os.symlink(target_path, dot_path)
     return dot_path
 
-def get_target_names():
-    targets = set([os.path.abspath(os.path.join(dot_dir(), f))
-                   for f in os.listdir(dot_dir()) if not f.startswith('.')])
-    targets.discard(dot_dir())
+def get_target_paths():
+    target_path, _, dotfiler_path = get_dot_dir()
+    targets = set([os.path.abspath(os.path.join(target_path, f))
+                   for f in os.listdir(target_path) if not f.startswith('.')])
+    targets.discard(dotfiler_path)
     return targets
 
-def get_dot_names():
+def get_dot_paths():
     return set([os.path.abspath(os.path.join(HOME_DIR, f))
                 for f in os.listdir(HOME_DIR) if f.startswith('.')])
 
 def status(namespace):
-    print("\nDot-files directory: %s (%s)" % get_dot_dir())
+    target_path, source, dotfiler_path = get_dot_dir()
+    print("\nDot-files directory: %s (%s)" % (target_path, source))
 
-    targets = get_target_names()
-    dots = get_dot_names()
+    targets = get_target_paths()
+    dots = get_dot_paths()
 
     pairs = set()
 
@@ -160,14 +166,14 @@ def status(namespace):
 
     print("\nManaged:\n")
     for (dot, target) in sorted(managed):
-        print("%-25s ----->     %s" % (simplify(dot), simplify(target)))
+        print("%-25s --->     %s" % (simplify(dot), simplify(target)))
     print("\nUnmanaged:\n")
     for (dot, target) in sorted(unmanaged):
         target = target or ""
-        print("%-25s ----->     %s" % (simplify(dot), simplify(target)))
+        print("%-25s --->     %s" % (simplify(dot), simplify(target)))
     print("\nUnlinked:\n")
     for (dot, target) in sorted(unlinked):
-        print("%-25s ----->     %s" % ("", simplify(target)))
+        print("%-25s --->     %s" % ("", simplify(target)))
 
 def add(namespace):
     files = namespace.files
@@ -193,14 +199,13 @@ def restore(namespace):
 
 def update(namespace):
     overwrite = namespace.overwrite
-    path = dot_dir()
-    files = map(lambda x: os.path.join(path, x), os.listdir(path))
+    targets = get_target_paths()
 
-    if len(files) < 1:
+    if len(targets) < 1:
         print("Nothing to do. DONE.")
     else:
-        print("%d file(s) to update" % len(files))
-        for f in files:
+        print("%d file(s) to update" % len(targets))
+        for f in targets:
             print("Symlinking to %s..." % f, end="")
             try:
                 update_path(f)
@@ -212,31 +217,31 @@ def update(namespace):
 
 import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION)
+subparsers = parser.add_subparsers(title="Available commands",
+                                   help='sub-command help')
+
+parser_s = subparsers.add_parser('status', help='Dot-files management status')
+parser_s.set_defaults(func=status)
+
+parser_a = subparsers.add_parser('add', help='Add dot-file to management')
+parser_a.set_defaults(func=add)
+parser_a.add_argument('files', metavar='DOTFILE', type=str, nargs='+',
+                      help='File to add')
+
+parser_r = subparsers.add_parser('restore', help='Restore dot-file to home-dir')
+parser_r.set_defaults(func=restore)
+parser_r.add_argument('files', metavar='DOTFILE', type=str, nargs='+',
+                      help='File to restore')
+
+parser_u = subparsers.add_parser('update',
+                                 help='Update symlinks to managed files')
+parser_u.add_argument('--overwrite', action='store_true',
+                      help='OVERWRITE existing dot-files with symlink.')
+parser_u.set_defaults(func=update)
+
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION)
-    subparsers = parser.add_subparsers(title="Available commands",
-                                       help='sub-command help')
-
-    parser_s = subparsers.add_parser('status', help='Dot-files management status')
-    parser_s.set_defaults(func=status)
-
-    parser_a = subparsers.add_parser('add', help='Add dot-file to management')
-    parser_a.set_defaults(func=add)
-    parser_a.add_argument('files', metavar='DOTFILE', type=str, nargs='+',
-                          help='File to add')
-
-    parser_r = subparsers.add_parser('restore', help='Restore dot-file to home-dir')
-    parser_r.set_defaults(func=restore)
-    parser_r.add_argument('files', metavar='DOTFILE', type=str, nargs='+',
-                          help='File to restore')
-
-    parser_u = subparsers.add_parser('update',
-                                     help='Update symlinks to managed files')
-    parser_u.add_argument('--overwrite', action='store_true',
-                          help='OVERWRITE existing dot-files with symlink.')
-    parser_u.set_defaults(func=update)
-
     if not sys.argv[1:]:
         parser.print_help()
     else:

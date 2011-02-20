@@ -48,6 +48,23 @@ class GlobalTests(unittest.TestCase):
         self.assertEqual(self.dot_dir, dotfiler.dot_dir())
         self.assertEqual(dotfiler.dot_dir(), os.path.abspath(dotfiler.dot_dir()))
 
+class FilenamesTest(TempDirTestCase):
+    def test_target_paths(self):
+        _, _, dotfiler_path = dotfiler.get_dot_dir()
+        targets = dotfiler.get_target_paths()
+        self.assertFalse(dotfiler_path in targets)
+        self.assertTrue(all([not os.path.basename(f).startswith('.')
+                             for f in targets]))
+        self.assertTrue(all([os.path.dirname(f) == dotfiler.dot_dir()
+                             for f in targets]))
+
+    def test_dot_paths(self):
+        dots = dotfiler.get_dot_paths()
+        self.assertTrue(all([os.path.basename(f).startswith('.')
+                             for f in dots]))
+        self.assertTrue(all([os.path.dirname(f) == dotfiler.HOME_DIR
+                             for f in dots]))
+
 class AddTests(TempDirTestCase):
     def test_dot_to_target(self):
         targetpath = os.path.join(self.dot_dir, "testfile")
