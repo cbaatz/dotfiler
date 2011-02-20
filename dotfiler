@@ -21,7 +21,7 @@ class flushfile(object):
         self.f.flush()
 sys.stdout = flushfile(sys.stdout)
 
-VERSION = '0.2.0-alpha'
+VERSION = '0.2.1-alpha'
 HOME_DIR = os.environ['HOME']
 
 class DirExistsException(Exception):
