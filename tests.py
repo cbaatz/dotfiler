@@ -65,12 +65,23 @@ class FilenamesTest(TempDirTestCase):
         self.assertTrue(all([os.path.dirname(f) == dotfiler.HOME_DIR
                              for f in dots]))
 
-class AddTests(TempDirTestCase):
     def test_dot_to_target(self):
         targetpath = os.path.join(self.dot_dir, "testfile")
         dotpath = os.path.join(self.home_dir, ".testfile")
         self.assertEqual(dotfiler.dot_to_target(dotpath), targetpath)
+        dotpath = os.path.join(self.home_dir, "testfile")
+        self.assertRaises(dotfiler.InvalidDotfileException,
+                          dotfiler.dot_to_target, dotpath)
 
+    def test_target_to_dot(self):
+        targetpath = os.path.join(self.dot_dir, "testfile")
+        dotpath = os.path.join(self.home_dir, ".testfile")
+        self.assertEqual(dotpath, dotfiler.target_to_dot(targetpath))
+        targetpath = os.path.join(self.dot_dir, ".testfile")
+        self.assertRaises(dotfiler.InvalidTargetException,
+                          dotfiler.target_to_dot, targetpath)
+
+class AddTests(TempDirTestCase):
     def test_normal_file(self):
         dotname = os.path.join(self.home_dir, ".testfile")
         open(dotname, "w").close()
@@ -146,11 +157,6 @@ class RestoreTests(TempDirTestCase):
                           dotfiler.restore_path, dotpath)
 
 class UpdateTests(TempDirTestCase):
-    def test_target_to_dot(self):
-        targetpath = os.path.join(self.dot_dir, "testfile")
-        dotpath = os.path.join(self.home_dir, ".testfile")
-        self.assertEqual(dotpath, dotfiler.target_to_dot(targetpath))
-
     def test_symlink_target(self):
         targetpath = os.path.join(self.dot_dir, "testfile")
         os.symlink(os.path.join(self.dot_dir, "atarget"), targetpath)

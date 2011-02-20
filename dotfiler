@@ -38,6 +38,10 @@ class TargetIsSymlinkException(Exception):
     pass
 class DotfileExistsException(Exception):
     pass
+class InvalidTargetException(Exception):
+    pass
+class InvalidDotfileException(Exception):
+    pass
 
 def get_dot_dir():
     dotfiler_dir = os.path.dirname(os.path.abspath(__file__))
@@ -54,20 +58,19 @@ def dot_dir():
     return get_dot_dir()[0]
 
 def dot_to_target(path):
-    # TODO: exception if dir is not home
     filename = os.path.basename(path)
     if filename.startswith("."):
         nakedname = filename[1:]
-#    else:
-#        raise NotManageableException("%s does not start with a dot.", filename)
+    else:
+        raise InvalidDotfileException("%s does not start with a dot." % filename)
     return os.path.join(dot_dir(), nakedname)
 
 def target_to_dot(path):
     filename = os.path.basename(path)
     if not filename.startswith("."):
         dotname = "." + filename
-    # else:
-    #     raise Exception
+    else:
+        raise InvalidTargetException("%s starts with a dot." % filename)
     return os.path.join(HOME_DIR, dotname)
 
 def add_path(dot_path):
